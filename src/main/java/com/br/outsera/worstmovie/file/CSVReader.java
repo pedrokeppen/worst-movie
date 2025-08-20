@@ -25,11 +25,11 @@ public class CSVReader implements ApplicationRunner {
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 		if (movieRepository.count() == 0) {
-			loadMoviesFromCsv();
+			loadLinesFromCsv();
 		}
 	}
 
-	private void loadMoviesFromCsv() {
+	private void loadLinesFromCsv() {
         try {
             ClassPathResource resource = new ClassPathResource("csv/movielist.csv");
             BufferedReader reader = new BufferedReader(
@@ -38,28 +38,28 @@ public class CSVReader implements ApplicationRunner {
             
             List<Movie> movies = new ArrayList<>();
             String line;
-            int lineNumber = 0;
-            int successfullyParsed = 0;
-            int errors = 0;
+            int lineCount = 0;
+            int successParsedCount = 0;
+            int errorsCount = 0;
             
             while ((line = reader.readLine()) != null) {
-                lineNumber++;
+                lineCount++;
                 
                 // Skip header
-                if (lineNumber == 1) {
+                if (lineCount == 1) {
                     log.debug("Header: {}", line);
                     continue;
                 }
                 
                 try {
-                    Movie movie = parseLine(line, lineNumber);
+                    Movie movie = parseLine(line, lineCount);
                     if (movie != null) {
                         movies.add(movie);
-                        successfullyParsed++;
+                        successParsedCount++;
                     }
                 } catch (Exception e) {
-                    errors++;
-                    log.warn("Error parsing line {}: '{}' - {}", lineNumber, line, e.getMessage());
+                    errorsCount++;
+                    log.warn("Error parsing line {}: '{}' - {}", lineCount, line, e.getMessage());
                 }
             }
             
@@ -68,12 +68,10 @@ public class CSVReader implements ApplicationRunner {
             if (!movies.isEmpty()) {
                 movieRepository.saveAll(movies);
                 log.info("CSV Processing completed:");
-                log.info("- Total lines read: {}", lineNumber);
-                log.info("- Successfully parsed: {}", successfullyParsed);
-                log.info("- Errors: {}", errors);
-                log.info("- Movies saved to database: {}", movies.size());
-            } else {
-                log.error("No movies were parsed from CSV!");
+                log.info("Total lines read: {}", lineCount);
+                log.info("Successfully parsed: {}", successParsedCount);
+                log.info("Errors: {}", errorsCount);
+                log.info("Movies saved to database: {}", movies.size());
             }
             
         } catch (Exception e) {
