@@ -1,0 +1,72 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.hidetake.swagger.generator' version '2.19.2'
+}
+
+group = 'com.br.outsera'
+version = '0.0.1-SNAPSHOT'
+description = 'Project to validate the worst film of the Golden Raspberry Awards'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'io.swagger:swagger-annotations:1.6.14'
+    implementation 'io.swagger.core.v3:swagger-annotations:2.2.10'
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+    
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'com.h2database:h2'
+    annotationProcessor 'org.projectlombok:lombok'
+    
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.46'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.named('compileJava') {
+    dependsOn tasks.named('generateSwaggerCodeWorstMovie')
+}
+
+swaggerSources {
+    worstMovie {
+        inputFile = file('src/main/resources/worst-movie.yaml')
+        code {
+            language = 'spring'
+            configFile = file('src/main/resources/swagger-config.json')
+            outputDir = file("$buildDir/generated/swagger")
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "$buildDir/generated/swagger/src/main/java"
+        }
+    }
+}

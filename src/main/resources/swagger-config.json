@@ -1,0 +1,19 @@
+{
+  "interfaceOnly": true,
+  "dateLibrary": "java17",
+  "useTags": true,
+  "useSpringBoot3": true,
+  "hideGenerationTimestamp": true,
+  "useBeanValidation": false,
+  "performBeanValidation": false,
+  "useJakartaEe": true,
+  "library": "spring-boot",
+  "serializationLibrary": "jackson",
+  "apiNameSuffix": "Controller",
+  "importMappings": {
+    "Valid": "jakarta.validation.Valid"
+  },
+  "typeMappings": {
+    "javax.validation": "jakarta.validation"
+  }
+}
