@@ -2,6 +2,10 @@
 
 ## VERSÃO 
 JDK 17 é necessário para a execução desta aplicação
+## IDE 
+Spring Tools Suite (STS for eclipse)
+## PROJETO
+Projeto iniciado a partir do sts
 
 ## Padrões utilizados para o desenvolvimento
 
@@ -34,6 +38,11 @@ http://localhost:8080/h2-console
 ### Limpar e compilar
 **bash**
 ./gradlew clean build
+
+### DesignPatterns
+**Padrão Repository, injeção de dependencias, Builder, **
+
+
 
 ## Documentação da API
 Swagger UI: http://localhost:8080/swagger-ui.html

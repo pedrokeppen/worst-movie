@@ -2,6 +2,8 @@ package com.br.outsera.worstmovie.file;
 
 import com.br.outsera.worstmovie.entity.Movie;
 import com.br.outsera.worstmovie.repository.MovieRepository;
+import com.br.outsera.worstmovie.util.ReportLogsUtil;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -38,28 +40,26 @@ public class CSVReader implements ApplicationRunner {
             
             List<Movie> movies = new ArrayList<>();
             String line;
-            int lineCount = 0;
-            int successParsedCount = 0;
-            int errorsCount = 0;
+            ReportLogsUtil reportLogsUtil = new ReportLogsUtil();
             
             while ((line = reader.readLine()) != null) {
-                lineCount++;
+            	reportLogsUtil.setLineCount(reportLogsUtil.getLineCount() + 1);
                 
                 // Skip header
-                if (lineCount == 1) {
+                if (reportLogsUtil.getLineCount() == 1) {
                     log.debug("Header: {}", line);
                     continue;
                 }
                 
                 try {
-                    Movie movie = parseLine(line, lineCount);
+                    Movie movie = parseLine(line, reportLogsUtil.getLineCount());
                     if (movie != null) {
                         movies.add(movie);
-                        successParsedCount++;
+                        reportLogsUtil.setSuccessParsedCount(reportLogsUtil.getSuccessParsedCount() + 1);
                     }
                 } catch (Exception e) {
-                    errorsCount++;
-                    log.warn("Error parsing line {}: '{}' - {}", lineCount, line, e.getMessage());
+                	reportLogsUtil.setErrorsCount(reportLogsUtil.getErrorsCount() + 1);
+                    log.warn("Error parsing line {}: '{}' - {}", reportLogsUtil.getLineCount(), line, e.getMessage());
                 }
             }
             
@@ -67,17 +67,21 @@ public class CSVReader implements ApplicationRunner {
             
             if (!movies.isEmpty()) {
                 movieRepository.saveAll(movies);
-                log.info("CSV Processing completed:");
-                log.info("Total lines read: {}", lineCount);
-                log.info("Successfully parsed: {}", successParsedCount);
-                log.info("Errors: {}", errorsCount);
-                log.info("Movies saved to database: {}", movies.size());
+                logReports(movies, reportLogsUtil);
             }
             
         } catch (Exception e) {
             log.error("Error loading movies from CSV", e);
         }
     }
+
+	private void logReports(List<Movie> movies, ReportLogsUtil reportLogsUtil) {
+		log.info("CSV Processing completed:");
+		log.info("Total lines read: {}", reportLogsUtil.getLineCount());
+		log.info("Successfully parsed: {}", reportLogsUtil.getSuccessParsedCount());
+		log.info("Errors: {}", reportLogsUtil.getErrorsCount());
+		log.info("Movies saved to database: {}", movies.size());
+	}
     
     private Movie parseLine(String line, int lineNumber) {
         if (line == null || line.trim().isEmpty()) {
@@ -96,30 +100,18 @@ public class CSVReader implements ApplicationRunner {
             Movie movie = new Movie();
             
             // Parse year
-            String yearStr = data[0].trim();
-            if (yearStr.isEmpty()) {
-                log.warn("Line {} has empty year: '{}'", lineNumber, line);
-                return null;
-            }
+            String yearStr = verifyIsEmpty (line, lineNumber, data, movie, 0, "year");
             movie.setYear(Integer.parseInt(yearStr));
             
             // Parse title
-            String title = data[1].trim();
-            if (title.isEmpty()) {
-                log.warn("Line {} has empty title: '{}'", lineNumber, line);
-                return null;
-            }
+            String title = verifyIsEmpty(line, lineNumber, data, movie, 1, "title");
             movie.setTitle(title);
             
             // Parse studios (can be empty)
             movie.setStudios(data[2].trim());
             
             // Parse producers
-            String producers = data[3].trim();
-            if (producers.isEmpty()) {
-                log.warn("Line {} has empty producers: '{}'", lineNumber, line);
-                return null;
-            }
+            String producers = verifyIsEmpty(line, lineNumber, data, movie, 3, "producers");
             movie.setProducers(producers);
             
             // Parse winner
@@ -129,12 +121,19 @@ public class CSVReader implements ApplicationRunner {
             log.debug("Parsed movie: {} ({}) - Winner: {}", title, movie.getYear(), movie.getWinner());
             return movie;
             
-        } catch (NumberFormatException e) {
-            log.warn("Line {} has invalid year format: '{}'", lineNumber, line);
-            return null;
         } catch (Exception e) {
             log.warn("Line {} parsing error: '{}' - {}", lineNumber, line, e.getMessage());
             return null;
         }
     }
+
+	private String verifyIsEmpty(String line, int lineNumber, String[] data, Movie movie, int position, String type) {
+		String text = data[position].trim();
+		if (text.isEmpty()) {
+		    log.warn("Line {} has empty {}: '{}'", lineNumber, type, line);
+		    return null;
+		}
+		
+		return text;
+	}
 }
