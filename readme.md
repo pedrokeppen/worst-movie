@@ -17,6 +17,9 @@ O Swagger deve ser desenvolvido utilizando o editor aqui >> https://editor.swagg
 
 **LAMBDA STREAM** - Utilizado para melhorar a leitura de algumas operações de loop, mapeamento e filtro.
 
+**JUNIT + MOCKITO + CAPTOR** - Utitlizado para testes unitários (Captor para mocar os retornos do DB)
+
+
 ## H2 CONSOLE - LOCAL
 http://localhost:8080/h2-console
 

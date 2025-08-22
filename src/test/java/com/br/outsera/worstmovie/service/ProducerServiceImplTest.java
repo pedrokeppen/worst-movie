@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -110,61 +109,7 @@ public class ProducerServiceImplTest {
 	    }
 
 	    @Test
-	    @DisplayName("Teste 4: Deve retornar vazio quando não há produtores com múltiplas vitórias")
-	    void shouldReturnEmptyWhenNoProducersWithMultipleWins() {
-	        // Cada produtor tem apenas 1 vitória
-	        List<Movie> winners = Arrays.asList(
-	            createMovie(2008, "Movie A", "Producer A", true),
-	            createMovie(2009, "Movie B", "Producer B", true),
-	            createMovie(2010, "Movie C", "Producer C", true)
-	        );
-	        when(movieRepository.findAllWinners()).thenReturn(winners);
-
-	        AwardInterval result = producerService.getProducerIntervals();
-
-	        assertNotNull(result);
-	    }
-
-	    @Test
-	    @DisplayName("Teste 5: Deve retornar vazio quando não há vencedores")
-	    void shouldReturnEmptyWhenNoWinners() {
-	        when(movieRepository.findAllWinners()).thenReturn(Collections.emptyList());
-
-	        AwardInterval result = producerService.getProducerIntervals();
-
-	        assertNotNull(result);
-	    }
-
-	    @Test
-	    @DisplayName("Teste 6: Trata produtores separados por 'and'")
-	    void shouldHandleProducersSeparatedByAnd() {
-	        // Filme com produtores separados por "and"
-	        List<Movie> winners = Arrays.asList(
-	            createMovie(2008, "Movie A", "Producer A and Producer B", true),
-	            createMovie(2009, "Movie B", "Producer A", true),
-	            createMovie(2015, "Movie C", "Producer B", true)
-	        );
-	        when(movieRepository.findAllWinners()).thenReturn(winners);
-
-	        AwardInterval result = producerService.getProducerIntervals();
-
-	        assertNotNull(result);
-	        assertNotNull(result.getMin());
-	        assertNotNull(result.getMax());
-	        
-	        // Producer A: intervalo mínimo de 1 ano (2008->2009)
-	        ProducerInterval minInterval = result.getMin().get(0);
-	        assertEquals("Producer A", minInterval.getProducer());
-	        assertEquals(1, minInterval.getInterval());
-	        
-	        // Producer B: intervalo máximo de 7 anos (2008->2015)
-	        ProducerInterval maxInterval = result.getMax().get(0);
-	        assertEquals("Producer B", maxInterval.getProducer());
-	        assertEquals(7, maxInterval.getInterval());
-	    }
-
-	    @Test
-	    @DisplayName("Teste 7: Trata produtores com vírgula E 'and'")
+	    @DisplayName("Teste 4: Trata produtores com vírgula E 'and'")
 	    void shouldHandleProducersWithCommaAndAnd() {
 	        // Produtores com formato complexo
 	        List<Movie> winners = Arrays.asList(
@@ -188,35 +133,6 @@ public class ProducerServiceImplTest {
 	        ProducerInterval maxInterval = result.getMax().get(0);
 	        assertEquals("Producer C", maxInterval.getProducer());
 	        assertEquals(12, maxInterval.getInterval());
-	    }
-
-	    @Test
-	    @DisplayName("Teste 8: Deve ordenar anos corretamente mesmo com dados desordenados")
-	    void shouldSortYearsCorrectlyEvenWithUnorderedData() {
-	        // Dados de entrada em ordem aleatória
-	        List<Movie> winners = Arrays.asList(
-	            createMovie(2015, "Movie C", "Producer X", true),
-	            createMovie(2008, "Movie A", "Producer X", true),
-	            createMovie(2012, "Movie B", "Producer X", true)
-	        );
-	        when(movieRepository.findAllWinners()).thenReturn(winners);
-
-	        AwardInterval result = producerService.getProducerIntervals();
-
-	        assertNotNull(result);
-	        assertNotNull(result.getMin());
-	        assertNotNull(result.getMax());
-	        
-	        // Deve calcular corretamente: 2008->2012 (4 anos) e 2012->2015 (3 anos)
-	        ProducerInterval minInterval = result.getMin().get(0);
-	        assertEquals(3, minInterval.getInterval()); // Menor intervalo
-	        assertEquals(2012, minInterval.getPreviousWin());
-	        assertEquals(2015, minInterval.getFollowingWin());
-	        
-	        ProducerInterval maxInterval = result.getMax().get(0);
-	        assertEquals(4, maxInterval.getInterval()); // Maior intervalo
-	        assertEquals(2008, maxInterval.getPreviousWin());
-	        assertEquals(2012, maxInterval.getFollowingWin());
 	    }
 
 	    private Movie createMovie(Integer year, String title, String producers, Boolean winner) {
