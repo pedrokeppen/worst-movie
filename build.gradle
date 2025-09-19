@@ -32,6 +32,8 @@ dependencies {
     implementation 'io.swagger:swagger-annotations:1.6.14'
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.10'
     implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+    implementation 'org.webjars:swagger-ui:4.15.5'
+    implementation 'org.webjars:webjars-locator-core:0.52'
     
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
