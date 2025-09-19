@@ -56,7 +56,7 @@ tasks.named('compileJava') {
 
 swaggerSources {
     worstMovie {
-        inputFile = file('src/main/resources/worst-movie.yaml')
+        inputFile = file('src/main/resources/static/worst-movie.yaml')
         code {
             language = 'spring'
             configFile = file('src/main/resources/swagger-config.json')
